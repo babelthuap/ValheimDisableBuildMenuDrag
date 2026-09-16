@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace DisableBuildMenuDrag
 {
-    [BepInPlugin("com.babelthuap.disablebuildmenudrag", "Disable Build Menu Drag", "1.0.0")]
+    [BepInPlugin("com.babelthuap.disablebuildmenudrag", "Disable Build Menu Drag", "1.0.1")]
     public class DisableBuildMenuDragPlugin : BaseUnityPlugin
     {
         private readonly Harmony harmony = new Harmony("com.babelthuap.disablebuildmenudrag");
@@ -28,7 +28,6 @@ namespace DisableBuildMenuDrag
         {
             Type inputType = Type.GetType("UnityEngine.Input, UnityEngine") ?? 
                              Type.GetType("UnityEngine.Input, UnityEngine.InputLegacyModule");
-
             return inputType?.GetMethod("GetMouseButton", new[] { typeof(int) });
         }
 
@@ -50,46 +49,22 @@ namespace DisableBuildMenuDrag
     }
 
 
-    // Fire UI button actions immediately on PointerDown ONLY for the build menu
+    // Fire UI button actions immediately on PointerDown
     [HarmonyPatch(typeof(Selectable), nameof(Selectable.OnPointerDown))]
     public static class Selectable_OnPointerDown_Patch
     {
         public static void Postfix(Selectable __instance, PointerEventData eventData)
         {
-            if (Player.m_localPlayer == null || Hud.instance == null || Hud.instance.m_buildHud == null)
+            if (Player.m_localPlayer == null || Hud.instance == null)
                 return;
 
             if (eventData != null && eventData.button == PointerEventData.InputButton.Left)
             {
                 if (__instance is Button btn)
                 {
-                    if (btn.transform.IsChildOf(Hud.instance.m_buildHud.transform))
-                    {
-                        btn.onClick?.Invoke();
-                    }
+                    btn.onClick?.Invoke();
                 }
             }
-        }
-    }
-
-    // Cancel the default Unity UI PointerUp click for the build menu to prevent double-clicks
-    [HarmonyPatch(typeof(Button), nameof(Button.OnPointerClick))]
-    public static class Button_OnPointerClick_Patch
-    {
-        public static bool Prefix(Button __instance, PointerEventData eventData)
-        {
-            if (Player.m_localPlayer == null || Hud.instance == null || Hud.instance.m_buildHud == null)
-                return true;
-
-            if (eventData != null && eventData.button == PointerEventData.InputButton.Left)
-            {
-                if (__instance.transform.IsChildOf(Hud.instance.m_buildHud.transform))
-                {
-                    return false; 
-                }
-            }
-
-            return true;
         }
     }
 
@@ -101,7 +76,6 @@ namespace DisableBuildMenuDrag
         public static void Postfix(Player __instance)
         {
             DisableBuildMenuDragPlugin.WaitingForMouseReleaseAfterPieceSelect = true;
-
             if (__instance != null && DisableBuildMenuDragPlugin.PlacePressedField != null)
             {
                 DisableBuildMenuDragPlugin.PlacePressedField.SetValue(__instance, false);
@@ -119,7 +93,6 @@ namespace DisableBuildMenuDrag
             if (DisableBuildMenuDragPlugin.WaitingForMouseReleaseAfterPieceSelect)
             {
                 bool attackHeld = DisableBuildMenuDragPlugin.IsLeftMouseHeld();
-
                 if (attackHeld)
                 {
                     if (DisableBuildMenuDragPlugin.PlacePressedField != null)
@@ -133,7 +106,6 @@ namespace DisableBuildMenuDrag
                     DisableBuildMenuDragPlugin.WaitingForMouseReleaseAfterPieceSelect = false;
                 }
             }
-
             return true;
         }
     }
