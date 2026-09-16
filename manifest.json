@@ -1,0 +1,9 @@
+{
+  "name": "DisableBuildMenuDrag",
+  "version_number": "1.0.0",
+  "website_url": "https://github.com/babelthuap/ValheimDisableBuildMenuDrag",
+  "description": "Fixes an issue where selecting pieces in the hammer build menu accidentally triggers menu dragging.",
+  "dependencies": [
+    "denikson-BepInExPack_Valheim-5.4.2202"
+  ]
+}
